@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:13.3
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user_db
+      POSTGRES_PASSWORD: password_db1206
+      POSTGRES_DB: database_library
+
+  library_offline:
+     build: library_offline/
+     restart: always
+     command: python manage.py runserver 0.0.0.0:8000
+     ports:
+       - "127.0.0.1:8000:8000"
+     volumes:
+       - ./library_offline/:/var/lib/
+     depends_on:
+       - db
+       -
+  redis:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A app worker -l info
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      - redis
+      - app
