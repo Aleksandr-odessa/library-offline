@@ -18,4 +18,6 @@ class Books(models.Model):
     availability = models.CharField("Наличие книги", choices=AVAILABILITY, default='free',max_length=15)
     date_of_receipt = models.DateField("Дата выдачи читателю", null=True)
     planned_return_date = models.DateField("Планируемая дата возврата", null=True)
-    readers = models.ForeignKey(Readers, to_field="readers_name", on_delete=models.CASCADE, null=True)
+    readers = models.ForeignKey(Readers,verbose_name="reader", to_field="readers_name", on_delete=models.CASCADE, null=True)
+
+

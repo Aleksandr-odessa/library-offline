@@ -142,3 +142,6 @@ cython_debug/
 .idea/
 
 data/
+/library_offline/library.sqlite3
+/library_offline/run_file.py
+/library_offline/sent_emails/

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -79,19 +79,17 @@ DATABASES = {
 
         'default': {
 
-            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            # 'NAME': 'database_library',
-            # 'USER': 'user_db',
-            # 'PASSWORD': 'password_db1206',
-            # 'HOST': 'db',
-            # 'PORT': 5432,
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'database_library',
+            'USER': 'user_db',
+            'PASSWORD': 'password_db1206',
+            'HOST': 'db',
+            'PORT': 5432,
 
 
-
-        'ENGINE': 'django.db.backends.sqlite3',
-
-
-        'NAME': BASE_DIR / 'library.sqlite3',
+        #
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'library.sqlite3',
 }
 }
 
@@ -134,8 +132,13 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
-CELERY_BROKER_URL = "redis://127.0.0.1:6379"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
+
+CELERY_BROKER_URL = 'redis://redis:6379/6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/6379'
+
+
+

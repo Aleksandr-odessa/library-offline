@@ -1,12 +1,14 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
-
+from datetime import date
+from datetime import timedelta
 from library.models import Books, Readers
 from library.serializers import (BooksSerializer, ReadersSerializer,
                                  UploadSerializer)
-from library.tasks import import_csv, import_csv_readers
-from library.utils.utils import create_dict_for_output, serach_nearest_book
+from library_offline.worker.tasks import import_csv, import_csv_readers, send_mail_to_debtors
+
+from library.utils.utils import serach_nearest_book
 
 
 class BooksViewSet(ModelViewSet):
@@ -22,18 +24,19 @@ class BooksViewSet(ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def book_reserved_reading(self, request):
-        books_reserved_temp = Books.objects.filter(availability="reserved").values()
-        books_reading_temp = Books.objects.filter(availability="reading").values()
-        books_reserved = create_dict_for_output(books_reserved_temp)
-        books_reading = create_dict_for_output(books_reading_temp)
+        books_reserved = Books.objects.filter(availability="reserved").values('id','title','author','date_of_receipt' )
+        books_reading = Books.objects.filter(availability="reading").values('id','title','author','date_of_receipt' )
         return Response({"reserved": books_reserved, "reading": books_reading})
+
+    @action(detail=False, methods=["get"])
+    def debtors(self, request):
+        send_mail_to_debtors.delay()
+        return Response("Task accepted. Please wait")
 
 
 class ReadersViewSet(ModelViewSet):
     queryset = Readers.objects.all()
     serializer_class = ReadersSerializer
-
-
 
 
 class UploadBooks(ViewSet):
@@ -48,7 +51,7 @@ class UploadBooks(ViewSet):
             for chunk in file_uploaded.chunks():
                 destination.write(chunk)
         import_csv.delay()
-        return Response("success")
+        return Response("Task accepted. Please wait")
 
 class UploadReaders(ViewSet):
     serializer_class = UploadSerializer
@@ -62,4 +65,4 @@ class UploadReaders(ViewSet):
             for chunk in file_uploaded.chunks():
                 destination.write(chunk)
         import_csv_readers.delay()
-        return Response("success")
+        return Response("Task accepted. Please wait")
